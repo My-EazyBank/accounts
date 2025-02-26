@@ -1,0 +1,29 @@
+package com.easybytes.accounts.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.http.HttpStatus;
+
+import java.time.LocalDateTime;
+
+@Schema(
+        name = "ErrorResponse",
+        description = "Schema to hold unsuccessful response information"
+)
+@Data @AllArgsConstructor
+public class ErrorResponseDTO {
+
+    @Schema(description = "API path of the request", example = "/accounts")
+    private String apiPath;
+
+    @Schema(description = "HTTP status code of the response", example = "400")
+    private HttpStatus errorCode;
+
+    @Schema(description = "Error message of the response", example = "Invalid mobile number")
+    private String errorMessage;
+
+    @Schema(description = "Timestamp of the error")
+    private LocalDateTime errorTime;
+
+}

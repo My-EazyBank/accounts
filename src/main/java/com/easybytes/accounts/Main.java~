@@ -1,0 +1,21 @@
+package com.easybytes.accounts;
+
+public class Main {
+    public static int climbStairsFibonacci(int n) {
+        if (n <= 2) {
+            return n;
+        }
+        int[] fib = new int[n + 1];
+        fib[1] = 1;
+        fib[2] = 2;
+        for (int i = 3; i <= n; i++) {
+            fib[i] = fib[i - 1] + fib[i - 2];
+        }
+        return fib[n];
+    }
+
+    public static void main(String[] args) {
+        int n = 10;
+        System.out.println("Total number of unique ways to climb " + n + " stairs: " + climbStairsFibonacci(n));
+    }
+}

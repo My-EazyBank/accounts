@@ -1,0 +1,128 @@
+package com.easybytes.accounts.controller;
+
+import com.easybytes.accounts.constants.AccountsConstants;
+import com.easybytes.accounts.dto.CustomerDTO;
+import com.easybytes.accounts.dto.ErrorResponseDTO;
+import com.easybytes.accounts.dto.ResponseDTO;
+import com.easybytes.accounts.service.IAccountsService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(path = "/api/v1/accounts", produces = {MediaType.APPLICATION_JSON_VALUE})
+@AllArgsConstructor
+@Validated
+@Tag(
+        name = "REST APIs for Accounts in EasyBank",
+        description = "CRUD Operations for Accounts details in EasyBank (Create, Update, Get, Delete)"
+)
+public class AccountsController {
+
+    private IAccountsService accountsService;
+
+    @PostMapping("/")
+    @Operation(
+            summary = "Create Account REST API",
+            description = "Create a customer and its account with provided details in EasyBank"
+    )
+    @ApiResponse(
+            responseCode = "201",
+            description = "HTTP Status Created"
+    )
+    public ResponseEntity<ResponseDTO> createAccount(@Valid @RequestBody CustomerDTO customerDTO) {
+        accountsService.createAccount(customerDTO);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new ResponseDTO(AccountsConstants.STATUS_201, AccountsConstants.MESSAGE_201));
+    }
+
+    @Operation(
+            summary = "Get Account REST API",
+            description = "Obtain customer and account details in EasyBank based on a mobile number"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "HTTP Status OK"
+    )
+    @GetMapping("/")
+    public ResponseEntity<CustomerDTO> getAccountDetails(@RequestParam
+                                                             @Pattern(regexp = "^$|[0-9]{10}", message = "Mobile number must be 10 digits") String mobileNumber) {
+        CustomerDTO customerDTO = accountsService.getAccountDetails(mobileNumber);
+        return ResponseEntity.status(HttpStatus.OK).body(customerDTO);
+    }
+
+    @Operation(
+            summary = "Update Account REST API",
+            description = "Update customer and account details for an account in EasyBank based on an account number"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "HTTP Status OK"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "HTTP Status Internal Server Error",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @PutMapping("/")
+    public ResponseEntity<ResponseDTO> updateAccount(@Valid @RequestBody CustomerDTO customerDTO) {
+        boolean updated = accountsService.updateAccount(customerDTO);
+        if (updated) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseDTO(AccountsConstants.STATUS_200, AccountsConstants.MESSAGE_200));
+        } else {
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new ResponseDTO(AccountsConstants.STATUS_417, AccountsConstants.MESSAGE_417_UPDATE));
+        }
+    }
+
+    @Operation(
+            summary = "Delete Account REST API",
+            description = "Delete customer and account information in EasyBank based on a mobile number"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "HTTP Status OK"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "HTTP Status Internal Server Error",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @DeleteMapping("/")
+    public ResponseEntity<ResponseDTO> deleteAccount(@RequestParam
+                                                         @Pattern(regexp = "^$|[0-9]{10}", message = "Mobile number must be 10 digits") String mobileNumber) {
+        boolean deleted = accountsService.deleteAccount(mobileNumber);
+        if (deleted) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ResponseDTO(AccountsConstants.STATUS_200, AccountsConstants.MESSAGE_200));
+        } else {
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new ResponseDTO(AccountsConstants.STATUS_417, AccountsConstants.MESSAGE_417_DELETE));
+        }
+    }
+}
